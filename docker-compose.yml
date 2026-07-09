@@ -1,0 +1,53 @@
+services:
+  # Capa de Base de Datos - PostgreSQL
+  db_container:
+    image: postgres:16-alpine
+    container_name: db_container
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: vzetadb
+      POSTGRES_USER: vzetauser
+      POSTGRES_PASSWORD: vzetapassword
+    volumes:
+      # Bind Mount para persistencia de datos (Requisito Rúbrica IE 3.3.1)
+      - ./postgres_data:/var/lib/postgresql/data
+    networks:
+      - red_vzeta
+
+  # Capa de Aplicación - Flask (Imagen personalizada)
+  myapp_container:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    container_name: myapp_container
+    restart: unless-stopped
+    environment:
+      DB_HOST: db_container
+      DB_PORT: 5432
+      DB_NAME: vzetadb
+      DB_USER: vzetauser
+      DB_PASSWORD: vzetapassword
+    depends_on:
+      - db_container
+    networks:
+      - red_vzeta
+
+  # Capa de Reverse Proxy - NGINX (Imagen personalizada)
+  mynginx_container:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: mynginx_container
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - myapp_container
+    networks:
+      - red_vzeta
+
+# Definición del Driver de Red (Requisito Rúbrica IE 2.4.1)
+networks:
+  red_vzeta:
+    driver: bridge

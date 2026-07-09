@@ -1,0 +1,13 @@
+/workspace
+credentials.env
+.aws_deployment
+aws-cli-bin/
+aws-cli-install/
+aws-cli-venv/
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
